@@ -1,0 +1,48 @@
+name: Update MFY site
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 */6 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mfy-site
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: xami666999-lgtm/mfy
+          ref: restore-168-intro
+          path: mfy-src
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+        working-directory: mfy-src
+      - run: npx vite build --config vite.web.config.ts --base /mfy/
+        working-directory: mfy-src
+      - name: Replace the site folder
+        run: |
+          rm -rf mfy
+          mkdir -p mfy
+          cp -a mfy-src/dist/. mfy/
+          touch mfy/.nojekyll
+      - name: Commit the site
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add -A mfy
+          if git diff --cached --quiet; then
+            echo "Site already matches this build."
+          else
+            git commit -m "Update the MFY site from restore-168-intro."
+            git push
+          fi
