@@ -1,0 +1,28 @@
+name: Restore catalog
+
+on: workflow_dispatch
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Put the old catalog back as a real page
+        run: |
+          git show 345f54ccea6b46ed17cce8595a01e47e082e5f82:index.html > index.html
+          python3 - << 'PY'
+          from pathlib import Path
+          p = Path("index.html")
+          html = p.read_text()
+          if "yt-gate.js" not in html:
+              html = html.replace("</body>", "<script src=\"./yt-gate.js\"></script></body>")
+          p.write_text(html)
+          PY
+          git config user.name xami666999-lgtm
+          git config user.email 308808809+xami666999-lgtm@users.noreply.github.com
+          git add index.html
+          git commit -m "restore old catalog page with YouTube sign-in and ad block"
+          git push
