@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mxsify · YouTube</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #121212; color: #fff; }
+    header, main { max-width: 860px; margin: 0 auto; padding: 20px; }
+    a { color: #e8b07a; }
+    input, button { font: inherit; }
+    input { background: #1e1e1e; border: 0; color: #fff; padding: 12px 14px; width: min(420px, 100%); }
+    button { background: #fff; color: #111; border: 0; border-radius: 999px; padding: 10px 16px; font-weight: 600; cursor: pointer; }
+    button.ghost { background: transparent; color: #aaa; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    article { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #2a2a2a; }
+    img { width: 56px; height: 56px; object-fit: cover; background: #222; }
+    small { color: #9a9a9a; }
+    #now { margin-top: 18px; color: #e8b07a; }
+  </style>
+</head>
+<body>
+  <header>
+    <p><a href="./">Mxsify</a> · YouTube</p>
+    <h1>YouTube music</h1>
+    <p id="who">Not signed in. Ads are blocked.</p>
+    <div class="row">
+      <button id="login" type="button">Sign in with YouTube</button>
+      <input id="name" placeholder="Account name" />
+      <button id="save" type="button">Save</button>
+      <button id="out" class="ghost" type="button">Sign out</button>
+    </div>
+    <div class="row" style="margin-top:16px">
+      <input id="q" placeholder="Search songs" />
+      <button id="go" type="button">Search</button>
+    </div>
+    <p id="now">Nothing playing</p>
+    <audio id="player" controls style="width:100%;margin-top:8px"></audio>
+  </header>
+  <main id="list"></main>
+  <script>
+    const PIPED = ["https://pipedapi.kavin.rocks", "https://pipedapi.adminforge.de", "https://api.piped.private.coffee"];
+    const AD = ["doubleclick.net", "googlesyndication.com", "googleadservices.com", "ads.youtube.com", "adservice.google.com", "youtube.com/pagead", "youtube.com/api/stats/ads"];
+    const KEY = "mxsify-yt";
+    const audio = document.getElementById("player");
+    const list = document.getElementById("list");
+    const now = document.getElementById("now");
+    let skips = [];
+    function user() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; } }
+    function paint() {
+      const u = user();
+      document.getElementById("who").textContent = u.signedIn ? (u.name || "YouTube") + " · ads blocked" : "Not signed in. Ads are blocked.";
+      document.getElementById("name").value = u.name || "";
+    }
+    function blocked(url) { const u = String(url || "").toLowerCase(); return AD.some((h) => u.includes(h)); }
+    async function piped(path) {
+      let last = "YouTube did not answer";
+      for (const base of PIPED) {
+        try {
+          const res = await fetch(base + path);
+          if (!res.ok) { last = "YouTube " + res.status; continue; }
+          return await res.json();
+        } catch (err) { last = err.message || last; }
+      }
+      throw new Error(last);
+    }
+    document.getElementById("login").onclick = () => window.open("https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2F", "mxsify-yt", "width=480,height=720");
+    document.getElementById("save").onclick = () => {
+      localStorage.setItem(KEY, JSON.stringify({ name: document.getElementById("name").value || "YouTube", signedIn: true }));
+      paint();
+    };
+    document.getElementById("out").onclick = () => { localStorage.removeItem(KEY); paint(); };
+    async function search() {
+      const q = document.getElementById("q").value.trim();
+      if (!q) return;
+      now.textContent = "Searching YouTube…";
+      const data = await piped("/search?q=" + encodeURIComponent(q) + "&filter=music_songs");
+      const items = (Array.isArray(data) ? data : data.items || []).filter((row) => row && row.url);
+      list.innerHTML = "";
+      now.textContent = items.length ? "Pick a song" : "No songs";
+      for (const row of items.slice(0, 24)) {
+        const id = String(row.url).split("v=")[1]?.slice(0, 11);
+        if (!id || id.length !== 11) continue;
+        const art = document.createElement("article");
+        art.innerHTML = `<img alt="" src="${row.thumbnail || ""}"><div><b></b><br><small></small></div>`;
+        art.querySelector("b").textContent = row.title || "Untitled";
+        art.querySelector("small").textContent = row.uploaderName || "YouTube";
+        const btn = document.createElement("button");
+        btn.textContent = "Play";
+        btn.onclick = () => play(id, row.title, row.uploaderName);
+        art.appendChild(btn);
+        list.appendChild(art);
+      }
+    }
+    async function play(id, title, artist) {
+      now.textContent = "Loading " + title;
+      const data = await piped("/streams/" + id);
+      const streams = [...(data.audioStreams || []), ...(data.videoStreams || [])].filter((row) => row.url && !blocked(row.url));
+      const audioOnly = streams.filter((row) => String(row.mimeType || "").includes("audio"));
+      const pick = (audioOnly[0] || streams[0]);
+      if (!pick) { now.textContent = "No clean stream"; return; }
+      skips = [];
+      try {
+        const res = await fetch("https://sponsor.ajay.app/api/skipSegments?videoID=" + id + "&categories=%5B%22sponsor%22,%22selfpromo%22,%22intro%22,%22outro%22%5D");
+        if (res.ok) skips = (await res.json()).map((row) => ({ start: row.segment[0], end: row.segment[1] }));
+      } catch {}
+      audio.src = pick.url;
+      audio.play().catch(() => {});
+      now.textContent = (artist || "YouTube") + " — " + title + " · ads blocked";
+    }
+    audio.ontimeupdate = () => {
+      const t = audio.currentTime;
+      const hit = skips.find((seg) => t >= seg.start && t < seg.end - 0.3);
+      if (hit) audio.currentTime = hit.end;
+    };
+    document.getElementById("go").onclick = () => search().catch((err) => { now.textContent = err.message; });
+    document.getElementById("q").onkeydown = (e) => { if (e.key === "Enter") search().catch((err) => { now.textContent = err.message; }); };
+    paint();
+  </script>
+</body>
+</html>
