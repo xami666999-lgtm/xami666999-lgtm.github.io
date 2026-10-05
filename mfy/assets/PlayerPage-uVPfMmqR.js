@@ -1,4 +1,4 @@
-import{b as mt,r as c,j as i,u as F,i as R,L as ze,J as M,t as A,M as ae,_ as He,N as fe,G as Be,P as Ve,f as Ue,O as ce,Q as ue,R as We}from"./index-D7i5QmNR.js";import{p as Je,a as Ye,i as Ge}from"./stremioAddons-DTG8hfUT.js";import{n as le}from"./filler-DdFUX6EC.js";import{l as D,c as Ke,d as Xe,s as Nt}from"./stremioImport-bP3qxwMZ.js";import{a as me,b as Qe}from"./crunchyroll-viaQgoJo.js";import{resolveFromTorrentio as Ze}from"./streams-Dkla1ybq.js";/**
+import{b as mt,r as c,j as i,u as F,i as R,L as ze,J as M,t as A,M as ae,_ as He,N as fe,G as Be,P as Ve,f as Ue,O as ce,Q as ue,R as We}from"./index-B2WmYkHz.js";import{p as Je,a as Ye,i as Ge}from"./stremioAddons-DTG8hfUT.js";import{n as le}from"./filler-DTBSNutL.js";import{l as D,c as Ke,d as Xe,s as Nt}from"./stremioImport-bP3qxwMZ.js";import{a as me,b as Qe}from"./crunchyroll-viaQgoJo.js";import{resolveFromTorrentio as Ze}from"./streams-Dkla1ybq.js";/**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
