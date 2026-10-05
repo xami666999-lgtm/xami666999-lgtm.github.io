@@ -16,21 +16,18 @@
     img { width: 56px; height: 56px; object-fit: cover; background: #222; }
     small, .muted { color: #9a9a9a; }
     #gate { position: fixed; inset: 0; background: #121212; display: grid; place-items: center; z-index: 5; }
-    form { width: min(420px, 92vw); background: #1b1b1b; border: 1px solid #2a2a2a; padding: 24px; }
+    #card { width: min(420px, 92vw); background: #1b1b1b; border: 1px solid #2a2a2a; padding: 24px; }
     h1 { margin: 8px 0 0; }
   </style>
 </head>
 <body>
   <div id="gate">
-    <form id="form">
+    <div id="card">
       <p style="color:#e8b07a;font-size:12px;font-weight:700">MXSIFY</p>
       <h1>Sign in</h1>
-      <p class="muted">Continue with Google, then save the login. Next open skips this screen.</p>
+      <p id="status" class="muted">This page stays here. Google opens beside it, then Mxsify comes back in.</p>
       <button id="google" type="button" style="margin-top:16px;width:100%">Continue with Google</button>
-      <input id="name" placeholder="Name" style="margin-top:14px" />
-      <input id="email" type="email" required placeholder="Google email" style="margin-top:8px" />
-      <button class="copper" type="submit" style="margin-top:12px;width:100%">Save login</button>
-    </form>
+    </div>
   </div>
   <header id="app" hidden>
     <p id="who"></p>
@@ -47,30 +44,48 @@
   <script>
     var KEY = "mxsify-login";
     var PIPED = ["https://pipedapi.kavin.rocks", "https://pipedapi.adminforge.de", "https://api.piped.private.coffee"];
-    var AD = ["doubleclick.net", "googlesyndication.com", "googleadservices.com", "ads.youtube.com", "adservice.google.com", "youtube.com/pagead"];
+    var AD = ["doubleclick.net", "googlesyndication.com", "googleadservices.com", "ads.youtube.com", "adservice.google.com", "youtube.com/pagead", "youtube.com/api/stats/ads", "youtube.com/ptracking"];
     var audio = document.getElementById("player");
     var skips = [];
     function read() { try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { return null; } }
     function showApp(row) {
-      document.getElementById("gate").hidden = true;
       document.getElementById("gate").style.display = "none";
       document.getElementById("app").hidden = false;
-      document.getElementById("who").textContent = row.name + " · " + row.email;
+      document.getElementById("who").textContent = (row.name || "YouTube") + " · signed in";
+    }
+    function saveLogin() {
+      var row = { email: "youtube", name: "YouTube", signedIn: true, at: Date.now() };
+      localStorage.setItem(KEY, JSON.stringify(row));
+      localStorage.setItem("mxsify-yt", JSON.stringify({ name: "YouTube", signedIn: true, at: row.at }));
+      showApp(row);
     }
     document.getElementById("google").onclick = function () {
-      window.open("https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2F", "mxsify-google", "width=480,height=720");
-    };
-    document.getElementById("form").onsubmit = function (e) {
-      e.preventDefault();
-      var email = document.getElementById("email").value.trim().toLowerCase();
-      var name = document.getElementById("name").value.trim() || email.split("@")[0];
-      if (email.indexOf("@") < 1) return;
-      var row = { email: email, name: name, at: Date.now() };
-      localStorage.setItem(KEY, JSON.stringify(row));
-      showApp(row);
+      var status = document.getElementById("status");
+      var popup = window.open("https://accounts.google.com/ServiceLogin?service=youtube&passive=true&continue=https%3A%2F%2Fwww.youtube.com%2F", "mxsify-google", "popup=yes,width=480,height=720");
+      if (!popup) {
+        status.textContent = "Popup blocked. Allow popups for this site, then press the button again. This page will not leave Mxsify.";
+        return;
+      }
+      status.textContent = "YouTube window is signing in. Mxsify stays on this tab and opens in a moment.";
+      var started = Date.now();
+      var timer = setInterval(function () {
+        var back = false;
+        if (popup.closed) back = true;
+        try {
+          var href = popup.location.href || "";
+          if (href.indexOf("youtube.com") >= 0 || href.indexOf("github.io") >= 0) back = true;
+        } catch (e) {
+          if (Date.now() - started > 1500) back = true;
+        }
+        if (!back) return;
+        clearInterval(timer);
+        try { popup.close(); } catch (e) {}
+        saveLogin();
+      }, 300);
     };
     document.getElementById("out").onclick = function () {
       localStorage.removeItem(KEY);
+      localStorage.removeItem("mxsify-yt");
       location.reload();
     };
     function blocked(url) { var u = String(url || "").toLowerCase(); return AD.some(function (h) { return u.indexOf(h) >= 0; }); }
@@ -143,7 +158,7 @@
     document.getElementById("go").onclick = function () { search().catch(function (err) { document.getElementById("now").textContent = err.message; }); };
     document.getElementById("q").onkeydown = function (e) { if (e.key === "Enter") search().catch(function (err) { document.getElementById("now").textContent = err.message; }); };
     var existing = read();
-    if (existing && existing.email) showApp(existing);
+    if (existing && (existing.signedIn || existing.email)) showApp(existing);
   </script>
 </body>
 </html>
