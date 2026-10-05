@@ -1,0 +1,1 @@
+const c="mfy-crunchy-login";function r(){try{return localStorage.getItem(c)==="1"}catch{return!1}}function o(){try{localStorage.setItem(c,"1")}catch{}}function e(){return"https://www.crunchyroll.com/login"}function a(n){return`https://www.crunchyroll.com/search?q=${encodeURIComponent(n.trim()||"anime")}`}export{r as a,a as b,e as c,o as s};
