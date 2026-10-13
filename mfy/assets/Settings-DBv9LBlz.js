@@ -1,4 +1,4 @@
-import{b as $,u as W,r as a,g as le,j as e,C as oe,h as re,p as ce,k as de,l as he,m as ue,n as me,D as pe,o as be,q as ye,v as xe,E as je}from"./index-DT8WlUX5.js";import{l as ge,i as N,r as ve,s as p,a as fe,b as Se}from"./stremioImport-C7rjUfmI.js";/**
+import{b as $,u as W,r as a,g as le,j as e,C as oe,h as re,p as ce,k as de,l as he,m as ue,n as me,D as pe,o as be,q as ye,v as xe,E as je}from"./index-C8Gsn2BV.js";import{l as ge,i as N,r as ve,s as p,a as fe,b as Se}from"./stremioImport-C7rjUfmI.js";/**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
