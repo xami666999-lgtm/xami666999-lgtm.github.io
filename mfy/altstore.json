@@ -1,0 +1,28 @@
+{
+  "name": "MFY",
+  "identifier": "com.mfy.altstore",
+  "sourceURL": "https://xami666999-lgtm.github.io/mfy/altstore.json",
+  "subtitle": "Movies, shows, and anime",
+  "description": "MFY for iPhone. Sideload with AltStore.",
+  "iconURL": "https://xami666999-lgtm.github.io/mfy/icons/mfy-512.png",
+  "website": "https://xami666999-lgtm.github.io/mfy/",
+  "tintColor": "e50914",
+  "apps": [
+    {
+      "name": "MFY",
+      "bundleIdentifier": "com.mfy.app",
+      "developerName": "MFY",
+      "subtitle": "Watch movies, shows, and anime",
+      "localizedDescription": "MFY phone wrap. Install with AltStore and your Apple ID. Refresh every 7 days, or use AltServer to keep it.",
+      "iconURL": "https://xami666999-lgtm.github.io/mfy/icons/mfy-512.png",
+      "tintColor": "e50914",
+      "category": "entertainment",
+      "version": "1.7.16",
+      "versionDate": "2026-10-18T12:27:47Z",
+      "downloadURL": "https://github.com/xami666999-lgtm/mfy/releases/download/ios-v1.7.16/MFY-iOS-1.7.16.ipa",
+      "size": 2607494,
+      "minOSVersion": "15.0"
+    }
+  ],
+  "news": []
+}
