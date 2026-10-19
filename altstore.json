@@ -1,0 +1,30 @@
+{
+  "name": "MFY",
+  "identifier": "com.mfy.altstore",
+  "sourceURL": "https://raw.githubusercontent.com/xami666999-lgtm/xami666999-lgtm.github.io/main/mfy/altstore.json",
+  "apps": [
+    {
+      "name": "MFY",
+      "bundleIdentifier": "com.mfy.app",
+      "developerName": "MFY",
+      "localizedDescription": "MFY for iPhone. Movies, shows, and anime. Install with AltStore and your Apple ID.",
+      "iconURL": "https://xami666999-lgtm.github.io/mfy/icons/mfy-512.png",
+      "tintColor": "e50914",
+      "category": "entertainment",
+      "versions": [
+        {
+          "version": "1.7.16",
+          "buildVersion": "16",
+          "date": "2026-10-18T12:27:47Z",
+          "downloadURL": "https://github.com/xami666999-lgtm/mfy/releases/download/ios-v1.7.16/MFY-iOS-1.7.16.ipa",
+          "size": 2607494,
+          "minOSVersion": "15.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {}
+      }
+    }
+  ]
+}
